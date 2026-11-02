@@ -19,26 +19,27 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
           xcodebuild -version
 
-      - name: 编译 iOS App (Release)
+      - name: 编译并归档 (Archive)
         working-directory: ./OmniDownloader-iOS
         run: |
-          xcodebuild build \
-            -project OmniDownloader.xcodeproj \
+          xcodebuild archive \
+            -workspace OmniDownloader.xcworkspace \
             -scheme OmniDownloader \
             -configuration Release \
             -sdk iphoneos \
-            -derivedDataPath build \
+            -archivePath build/OmniDownloader.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
 
-      - name: 打包成 IPA
+      - name: 导出为 IPA
+        working-directory: ./OmniDownloader-iOS
         run: |
           mkdir -p Payload
-          cp -r OmniDownloader-iOS/build/Build/Products/Release-iphoneos/OmniDownloader.app Payload/
+          cp -r build/OmniDownloader.xcarchive/Products/Applications/OmniDownloader.app Payload/
           zip -r OmniDownloader.ipa Payload
 
       - name: 上传 IPA 构件
         uses: actions/upload-artifact@v4
         with:
           name: OmniDownloader.ipa
-          path: OmniDownloader.ipa
+          path: OmniDownloader-iOS/OmniDownloader.ipa
